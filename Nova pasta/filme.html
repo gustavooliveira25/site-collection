@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Detalhes do Filme</title>
+
+<style>
+body{
+  background:#080808;
+  color:#e6e6e6;
+  font-family:Inter,Arial,Helvetica,sans-serif;
+  margin:0;
+  padding:24px
+}
+.header{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-bottom:26px
+}
+.header a{
+  color:#e6e6e6;
+  text-decoration:none;
+  background:linear-gradient(180deg,#111 0%, #0d0d0d 100%);
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.03)
+}
+.container{
+  display:flex;
+  gap:36px;
+  align-items:flex-start;
+  max-width:1100px;
+  margin:0 auto
+}
+.poster-large{
+  width:320px;
+  min-width:260px;
+  height:460px;
+  background:linear-gradient(180deg,#171717,#0f0f0f);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.03)
+}
+.poster-large img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block
+}
+.info{
+  flex:1;
+  max-width:760px
+}
+.info h1{
+  margin:0 0 6px;
+  font-size:28px;
+  color:#ffffff
+}
+.meta{
+  color:#bdbdbd;
+  margin-bottom:14px;
+  display:flex;
+  gap:12px;
+  align-items:center
+}
+.section{
+  background:linear-gradient(180deg,#0e0e0e,#0b0b0b);
+  padding:18px;
+  border-radius:10px;
+  margin-top:14px;
+  border:1px solid rgba(255,255,255,0.02)
+}
+.badge{
+  background:#e10600;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:10px;
+  font-weight:700;
+  font-size:12px
+}
+.elenco li,.curiosidades li{
+  margin-bottom:8px
+}
+.rating{
+  display:inline-flex;
+  align-items:center;
+  gap:8px
+}
+.stars{
+  color:#ffcc00
+}
+.muted{
+  color:#9e9e9e
+}
+
+/* DOWNLOAD */
+.download-box{margin-top:10px}
+.download-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:14px 18px;
+  border-radius:12px;
+  background:linear-gradient(180deg,#0f2a14,#0b1f10);
+  border:1px solid rgba(255,255,255,0.06);
+  color:#e6ffe6;
+  text-decoration:none;
+  font-weight:600;
+  transition:.2s ease
+}
+.download-btn:hover{
+  transform:translateY(-2px);
+  background:linear-gradient(180deg,#13361a,#0e2a15)
+}
+.torrent-icon{
+  width:22px;
+  height:22px;
+  border-radius:6px;
+  background:#00b140;
+  color:#000;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px
+}
+
+@media (max-width:900px){
+  .container{flex-direction:column;align-items:center;padding:0 12px}
+  .poster-large{width:320px;height:460px}
+  .info{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <a href="Novo atalho.html">← Voltar</a>
+  <h2 id="page-title">Detalhes</h2>
+</div>
+
+<div class="container">
+  <div class="poster-large" id="poster">Poster</div>
+
+  <div class="info">
+    <h1 id="title">Título</h1>
+
+    <div class="meta">
+      <span id="ano"></span>
+      · <span id="qualidade" class="badge"></span>
+      <div class="rating">
+        <span class="stars">★ ★ ★ ★ ☆</span>
+        <span class="muted">(—)</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Sinopse</h3>
+      <p id="descricao">Descrição do filme.</p>
+    </div>
+
+    <div class="section">
+      <h3>Elenco</h3>
+      <ul id="elenco" class="elenco"></ul>
+    </div>
+
+    <div class="section">
+      <h3>Curiosidades</h3>
+      <ul id="curiosidades" class="curiosidades"></ul>
+    </div>
+
+    <div class="section">
+      <h3>Detalhes</h3>
+      <p><strong>Diretor / Autor:</strong> <span id="autor"></span></p>
+      <p><strong>Nota do público:</strong> <span id="nota">—</span></p>
+    </div>
+
+    <!-- DOWNLOAD -->
+    <div class="section" id="downloadSection" style="display:none">
+      <h3>Download</h3>
+
+      <div class="download-box">
+        <a id="torrentLink" class="download-btn" target="_blank">
+          <span class="torrent-icon">⛓</span>
+          Download Torrent
+        </a>
+      </div>
+
+      <p class="muted" style="margin-top:8px">
+        ⚠️ É necessário um cliente torrent instalado
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  const moviesJson = sessionStorage.getItem('moviesData');
+  const id = sessionStorage.getItem('currentMovieId');
+
+  if(!moviesJson || id===null){
+    document.getElementById('page-title').textContent = 'Nenhum filme selecionado';
+    document.getElementById('descricao').textContent = 'Selecione um filme na página principal.';
+    return;
+  }
+
+  const movies = JSON.parse(moviesJson);
+  const movie = movies.find(m=>String(m._id)===String(id));
+
+  if(!movie){
+    document.getElementById('page-title').textContent = 'Filme não encontrado';
+    return;
+  }
+
+  document.getElementById('title').textContent = movie.titulo || '—';
+  document.getElementById('ano').textContent = movie.ano || '—';
+  document.getElementById('qualidade').textContent = movie.qualidade || '—';
+  document.getElementById('page-title').textContent = movie.titulo || 'Detalhes';
+  document.getElementById('descricao').textContent = movie.descricao || 'Sinopse ainda não adicionada.';
+  document.getElementById('autor').textContent = movie.autor || 'Diretor desconhecido';
+  document.getElementById('nota').textContent = movie.nota || '—';
+
+  const elenco = movie.elenco || ['Ator 1','Ator 2'];
+  const curios = movie.curiosidades || ['Curiosidade 1','Curiosidade 2'];
+
+  elenco.forEach(a=>{
+    const li=document.createElement('li');
+    li.textContent=a;
+    document.getElementById('elenco').appendChild(li);
+  });
+
+  curios.forEach(c=>{
+    const li=document.createElement('li');
+    li.textContent=c;
+    document.getElementById('curiosidades').appendChild(li);
+  });
+
+  const poster = document.getElementById('poster');
+  if(movie.img){
+    poster.innerHTML = `<img src="${movie.img}" alt="${movie.titulo}">`;
+  }else{
+    poster.textContent = movie.titulo;
+  }
+
+  /* DOWNLOAD */
+  if(movie.download){
+    document.getElementById('downloadSection').style.display = 'block';
+    document.getElementById('torrentLink').href = movie.download;
+  }
+})();
+</script>
+
+</body>
+</html>
