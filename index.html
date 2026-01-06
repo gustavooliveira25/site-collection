@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>MovieHub</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#0b0b0b;
+  color:#fff;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+/* HEADER */
+header{
+  background:#000;
+  padding:15px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.logo{display:flex;align-items:center;gap:10px;color:#e10600;font-size:22px;font-weight:700}
+.logo svg{width:40px;height:28px;flex:0 0 auto}
+.logo-text{font-family:Arial, Helvetica, sans-serif;letter-spacing:0.5px}
+
+nav button{
+  background:#111;
+  color:#fff;
+  border:none;
+  padding:10px 16px;
+  margin-left:8px;
+  border-radius:8px;
+  cursor:pointer;
+}
+nav button:hover{background:#e10600}
+
+/* SECTION */
+.section{
+  padding:20px 30px;
+}
+.section h2{
+  margin:0 0 15px;
+}
+
+/* CAROUSEL */
+.carousel{
+  position:relative;
+}
+
+.row{
+  display:flex;
+  gap:18px;
+  overflow-x:auto;
+  scroll-behavior:smooth;
+  padding-bottom:10px;
+}
+.row::-webkit-scrollbar{display:none}
+
+.card{
+  min-width:180px;
+  background:#111;
+  border-radius:14px;
+  overflow:hidden;
+  transition:.3s;
+}
+.card:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 18px #e10600;
+}
+
+.card img{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+}
+
+.card svg{
+  width:100%;
+  height:260px;
+  display:block;
+}
+
+.poster{
+  width:100%;
+  height:260px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#222;
+  color:#fff;
+  font-family:Arial, Helvetica, sans-serif;
+  font-size:14px;
+  text-align:center;
+}
+
+.poster::before{
+  content: attr(data-title);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  padding:8px;
+  box-sizing:border-box;
+  color:#fff;
+  font-size:16px;
+  text-align:center;
+}
+
+.poster-img{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  display:block;
+}
+
+.info{
+  padding:8px;
+}
+.info h3{
+  font-size:13px;
+  margin:0 0 4px;
+}
+.meta{
+  font-size:12px;
+  color:#aaa;
+  display:flex;
+  gap:8px;
+}
+.badge{
+  background:#e10600;
+  padding:2px 6px;
+  border-radius:6px;
+  color:#fff;
+}
+
+/* ARROWS */
+.arrow{
+  position:absolute;
+  top:40%;
+  background:#000000cc;
+  border:none;
+  color:#fff;
+  font-size:26px;
+  padding:10px;
+  cursor:pointer;
+}
+.arrow.left{left:0}
+.arrow.right{right:0}
+.arrow:hover{background:#e10600}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">GustaFlix</div>
+  <nav>
+    <button>Início</button>
+    <button>Filmes</button>
+    <button>Séries</button>
+  </nav>
+</header>
+
+<!-- LANÇAMENTOS -->
+<div class="section">
+  <h2>🔥 Lançamentos</h2>
+  <div class="carousel">
+    <button class="arrow left" onclick="scrollRow('lanc',-400)">❮</button>
+    <div class="row" id="lanc"></div>
+    <button class="arrow right" onclick="scrollRow('lanc',400)">❯</button>
+  </div>
+</div>
+
+<!-- POPULARES -->
+<div class="section">
+  <h2>⭐ Populares</h2>
+  <div class="carousel">
+    <button class="arrow left" onclick="scrollRow('pop',-400)">❮</button>
+    <div class="row" id="pop"></div>
+    <button class="arrow right" onclick="scrollRow('pop',400)">❯</button>
+  </div>
+</div>
+
+<!-- SÉRIES -->
+<div class="section">
+  <h2>📺 Séries</h2>
+  <div class="carousel">
+    <button class="arrow left" onclick="scrollRow('series',-400)">❮</button>
+    <div class="row" id="series"></div>
+    <button class="arrow right" onclick="scrollRow('series',400)">❯</button>
+  </div>
+</div>
+
+<script>
+function posterDiv(text){
+  const safeText = String(text).replace(/"/g,'\\"');
+  return `<div class="poster" data-title="${safeText}"></div>`;
+}
+
+function cardHTML(f){
+  const poster = (f.img && f.img.startsWith('img/')) ? `<img src="${f.img}" class="poster-img" alt="${f.titulo}">` : posterDiv(f.titulo);
+  return `
+  <div class="card" role="button" onclick="openDetail(${f._id})" style="cursor:pointer">
+    ${poster}
+    <div class="info">
+      <h3>${f.titulo}</h3>
+      <div class="meta">
+        <span>${f.ano}</span>
+        <span class="badge">${f.qualidade}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function carregar(id,lista){
+  const row=document.getElementById(id);
+  lista.forEach(f=>row.innerHTML+=cardHTML(f));
+}
+
+function scrollRow(id,val){
+  document.getElementById(id).scrollLeft+=val;
+}
+
+function openDetail(id){
+  try{ sessionStorage.setItem('currentMovieId', String(id)); }catch(e){}
+  window.location.href = 'filme.html';
+}
+
+const filmes = [
+ {img:"img/avatar.jpg",titulo:"Avatar: Fogo e Cinzas",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/00FFFF/000000?text=TRON+Ares",titulo:"TRON: Ares",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/FF6600/FFFFFF?text=Predador",titulo:"Predador: Terras Selvagens",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/00DD00/000000?text=Anaconda",titulo:"Anaconda",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/FF99FF/000000?text=Zootopia",titulo:"Zootopia 2",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/9933FF/FFFFFF?text=Percy+Jackson",titulo:"Percy Jackson",ano:2024,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/FF3333/FFFFFF?text=Five+Nights",titulo:"Five Nights at Freddy's 2",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/FFD700/000000?text=Truque+Mestre",titulo:"Truque de Mestre 3",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/FF9900/FFFFFF?text=Duna+3",titulo:"Duna: Parte 3",ano:2025,qualidade:"4K"},
+ {img:"https://via.placeholder.com/180x260/00FF00/000000?text=Godzilla",titulo:"Godzilla vs Kong 2",ano:2024,qualidade:"1080p"},
+
+ {img:"https://via.placeholder.com/180x260/0066FF/FFFFFF?text=Missao",titulo:"Missão Impossível 8",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/330000/FFFF00?text=Matrix",titulo:"Matrix Reboot",ano:2024,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/1a1a1a/FFFF00?text=Batman",titulo:"Batman: Gotham Sombria",ano:2024,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/CC0000/FFFF00?text=Velozes",titulo:"Velozes & Furiosos 11",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/0033FF/FFFF00?text=Aranha",titulo:"Homem-Aranha: Novo Arco",ano:2024,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/FF0033/FFFF00?text=Deadpool",titulo:"Deadpool 3",ano:2024,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/663300/FFFF00?text=Oppenheimer",titulo:"Oppenheimer 2",ano:2026,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/00CCCC/000000?text=Transformers",titulo:"Transformers: Ascensão",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/00AA00/FFFFFF?text=Jurassic",titulo:"Jurassic World: Extinção",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/330066/FFFF00?text=Freira",titulo:"A Freira 3",ano:2024,qualidade:"1080p"},
+
+ {img:"https://via.placeholder.com/180x260/660000/FFFF00?text=Invocacao",titulo:"Invocação do Mal 4",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/CCCC00/000000?text=Gladiador",titulo:"Gladiador 2",ano:2024,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/FF3300/FFFFFF?text=Mad+Max",titulo:"Mad Max: Renascido",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/003366/FFFF00?text=Blade+Runner",titulo:"Blade Runner: Nexus",ano:2024,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/00FFFF/000000?text=Interestelar",titulo:"Interestelar II",ano:2026,qualidade:"4K"},
+ {img:"https://via.placeholder.com/180x260/FF66FF/000000?text=Origem",titulo:"A Origem 2",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/FFAA00/000000?text=Vorazes",titulo:"Jogos Vorazes: Retorno",ano:2024,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/6600FF/FFFFFF?text=Macacos",titulo:"Planeta dos Macacos",ano:2024,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/FF0000/FFFFFF?text=John+Wick",titulo:"John Wick 5",ano:2025,qualidade:"1080p"},
+ {img:"https://via.placeholder.com/180x260/333333/CCCCCC?text=Protetor",titulo:"O Protetor Final",ano:2024,qualidade:"1080p"}
+];
+
+const lancamentos=[
+ {img:"img/avatar.jpg",titulo:"Avatar: Fogo e Cinzas",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:AVATAR"},
+ {img:"img/Tron.jpeg",titulo:"TRON: Ares",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:TRON"},
+ {img:"img/Predator.png",titulo:"Predador: Terras Selvagens",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:PREDADOR"},
+ {img:"img/anaconda.webp",titulo:"Anaconda",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:ANACONDA"},
+ {img:"img/Zootopia_2.jpg",titulo:"Zootopia 2",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:ZOOTOPIA"},
+ {img:"img/Five.png",titulo:"Five Nights at Freddy's 2",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:FNAF2"},
+ {img:"img/truque.jpg",titulo:"Truque de Mestre 3",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:TRUQUE"},
+ {img:"img/godzilla.jpg",titulo:"Godzilla vs Kong 2",ano:2024,qualidade:"1080p",download:"magnet:?xt=urn:btih:GODZILLA"},
+ {img:"img/impossivel.png",titulo:"Missão Impossível 8",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:MI8"},
+ {img:"img/matrix.png",titulo:"Matrix",ano:2024,qualidade:"1080p",download:"magnet:?xt=urn:btih:MATRIX"},
+ {img:"img/velozes9.jpg",titulo:"Velozes & Furiosos 9",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:VELOZES9"},
+ {img:"img/Deadpool.jpg",titulo:"Deadpool",ano:2024,qualidade:"1080p",download:"magnet:?xt=urn:btih:DEADPOOL"},
+ {img:"img/Jurassic.jpg",titulo:"Jurassic World: Extinção",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:JURASSIC"},
+ {img:"img/afreira.jfif",titulo:"A Freira",ano:2024,qualidade:"1080p",download:"magnet:?xt=urn:btih:FREIRA3"}
+];
+
+
+const populares=[
+ {img:"img/percy.png",titulo:"Percy Jackson",ano:2024,qualidade:"1080p",download:"magnet:?xt=urn:btih:PERCY"},
+ {img:"img/2.webp",titulo:"Five Nights",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:FNAF"},
+ {img:"img/strangerthings.jpg",titulo:"Stranger Things",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:STRANGER"},
+ {img:"img/it.jpg",titulo:"IT: Derry",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:ITDERRY"},
+ {img:"img/interstellar.png",titulo:"Interestelar",ano:2026,qualidade:"4K",download:"magnet:?xt=urn:btih:INTER"},
+ {img:"img/inter2.jfif",titulo:"Interestelar II",ano:2026,qualidade:"4K",download:"magnet:?xt=urn:btih:INTER2"},
+ {img:"img/Godzillavs.jpg",titulo:"Godzilla vs Kong 2",ano:2024,qualidade:"1080p",download:"magnet:?xt=urn:btih:GODZILLA2"},
+ {img:"img/invoca4.png",titulo:"Invocação do Mal 4",ano:2025,qualidade:"1080p",download:"magnet:?xt=urn:btih:INVOCACAO4"},
+ {img:"img/macaco.jpeg",titulo:"Planeta dos Macacos",ano:2024,qualidade:"1080p",download:"magnet:?xt=urn:btih:MACACOS"}
+];
+
+
+const series=[
+ {img:"img/strangerthings.jpg",titulo:"Stranger Things",ano:2016,qualidade:"4K",download:"magnet:?magnet:?xt=urn:btih:85523706ca5eb7f9d9e28f201ed27f1a1e679cfc&dn=HIDRATORRENTS.ORG..MKV.Stranger.Things.S05E08.EPIS%C3%93DIO.FINAL.1080p.WEB-DL.DUAL.5.1&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce=urn:btih:STRANGER"},
+ {img:"img/bad.webp",titulo:"Breaking Bad",ano:2008,qualidade:"1080p",download:"magnet:?xt=urn:btih:BREAKINGBAD"},
+ {img:"img/The.webp",titulo:"The Boys",ano:2019,qualidade:"4K",download:"magnet:?xt=urn:btih:THEBOYS"},
+ {img:"img/la.jpg",titulo:"La Casa de Papel",ano:2017,qualidade:"1080p",download:"magnet:?xt=urn:btih:LACASA"},
+ {img:"img/dark.jpg",titulo:"Dark",ano:2017,qualidade:"4K",download:"magnet:?xt=urn:btih:DARK"},
+ {img:"img/thelest.webp",titulo:"The Last of Us",ano:2023,qualidade:"4K",download:"magnet:?xt=urn:btih:LASTOFUS"},
+ {img:"img/vikings.jpg",titulo:"Vikings",ano:2013,qualidade:"1080p",download:"magnet:?xt=urn:btih:VIKINGS"},
+ {img:"img/game.jpg",titulo:"Game of Thrones",ano:2011,qualidade:"4K",download:"magnet:?xt=urn:btih:GOT"},
+ {img:"img/Peaky.png",titulo:"Peaky Blinders",ano:2013,qualidade:"1080p",download:"magnet:?xt=urn:btih:PEAKY"},
+ {img:"img/The.jpg",titulo:"The Walking Dead",ano:2010,qualidade:"1080p",download:"magnet:?xt=urn:btih:TWD"},
+ {img:"img/lost.jpg",titulo:"Lost City",ano:2022,qualidade:"1080p",download:"magnet:?xt=urn:btih:LOSTCITY"}
+];
+
+
+// Registrar todos os filmes em um array global e atribuir ids únicos
+const allMovies = [...filmes, ...lancamentos, ...populares, ...series];
+allMovies.forEach((m,i)=>m._id = i);
+try{ sessionStorage.setItem('moviesData', JSON.stringify(allMovies)); }catch(e){}
+
+/* LOAD */
+carregar("lanc",lancamentos);
+carregar("pop",populares);
+carregar("series",series);
+</script>
+
+</body>
+</html>
